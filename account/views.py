@@ -9,6 +9,7 @@ from .forms import LoginForm
 
 
 def user_login(request):
+    error = ''
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -21,14 +22,14 @@ def user_login(request):
                         login(request, user)
                         return HttpResponse('Authenticated successfully')
                     else:
-                        return HttpResponse('Disabled account')
+                        error = 'Disabled account'
                 else:
-                    return HttpResponse('Password is Error')
+                    error = 'Password is Error'
             else:
-                return HttpResponse('User Not Found')
+                error = 'User Not Found'
         else:
-            return HttpResponse("Invalid login")
+            error = "Invalid login"
     else:
         form = LoginForm()
-    return render(request, 'account/login.html', {'form': form, })
+    return render(request, 'account/login.html', {'form': form, 'error':error})
 # Create your views here.
