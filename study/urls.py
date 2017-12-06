@@ -15,9 +15,9 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from account import views as account_view
+# from account import views as account_view
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^login/$', account_view.user_login, name='user_login'),
+    # url(r'^login/$', account_view.user_login, name='user_login'),
 ]
