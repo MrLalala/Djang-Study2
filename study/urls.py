@@ -1,3 +1,4 @@
+# coding:utf-8
 """study URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -22,6 +23,10 @@ from blog import urls as blog_urls
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^index/$', blog_views.index, name='index'),
-    url(r'^blog/', include(blog_urls))
+    # 使用include注意要使用namespace,这样在使用reverse函数
+    # 反向解析url时就可以直接使用
+    # namespace:XXX
+    # 的形式进行查找。
+    url(r'^blog/', include(blog_urls, namespace='blog')),
     # url(r'^login/$', account_view.user_login, name='user_login'),
 ]
