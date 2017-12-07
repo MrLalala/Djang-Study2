@@ -6,6 +6,12 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 
 
+class PublishManager(models.Manager):
+    # 获取结果集的方法
+    def get_queryset(self):
+        return super(PublishManager, self).get_queryset().filter(status='published')
+
+
 class Post(models.Model):
     STATUS_CHOICES = (
         ('draft', 'Draft'),
@@ -23,11 +29,14 @@ class Post(models.Model):
     status = models.CharField(max_length=10,
                               choices=STATUS_CHOICES,
                               default='draft')
+    objects = models.Manager()
+    published = PublishManager()
 
     class Meta:
         ordering = ('-publish',)
 
     def __str__(self):
         return self.title
+
 
 # Create your models here.
