@@ -13,4 +13,5 @@ My Blog
 {#        truncatewords指定最多显示多少个字符,linebreaks指定将文本换行符转为html换行符#}
         {{ post.body|truncatewords:30|linebreaks }}
     {% endfor %}
+    {% include 'blog/post/pagination.html' with page=posts %}
 {% endblock %}

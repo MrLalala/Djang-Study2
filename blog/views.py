@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from .models import Post
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 def index(request):
@@ -11,8 +12,22 @@ def index(request):
 
 
 def post_list(request):
-    posts = Post.objects.all()
-    return render(request, 'blog/post/list.html', {'posts': posts, })
+    object_lists = Post.objects.all()
+    # 定义分页，将posts分页，每页有三个
+    paginator = Paginator(object_lists, 3)
+    # 获取当前页数
+    page = request.GET.get('page')
+    try:
+        # 获取要显示的那一页
+        posts = paginator.page(page)
+    except PageNotAnInteger:
+        # 不足一页，就显示第一页
+        # 当第一次get时使用的也是这个方法。
+        posts = paginator.page(1)
+    except EmptyPage:
+        # 如果页数超过总页数则返回最后一页
+        posts = paginator.page(paginator.num_pages)
+    return render(request, 'blog/post/list.html', {'posts': posts, 'page':page})
     # return HttpResponse('this is a test')
 
 
