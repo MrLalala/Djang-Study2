@@ -1,3 +1,4 @@
+# coding:utf-8
 """
 Django settings for study project.
 
@@ -126,3 +127,10 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
+
+# 添加邮件发送功能
+EMAIL_USE_SSL = True
+EMAIL_HOST = 'smtp.qq.com'  # 如果是 163 改成 smtp.163.com
+EMAIL_PORT = 465
+EMAIL_HOST_USER = '1354410847@qq.com' # 帐号
+EMAIL_HOST_PASSWORD = 'jxzs1996'  # 密码

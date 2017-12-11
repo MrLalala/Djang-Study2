@@ -6,6 +6,8 @@ from django.http import HttpResponse
 from .models import Post
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import ListView
+from .forms import EmailPostForm
+from django.core.mail import send_mail
 
 
 class PostView(ListView):
@@ -55,3 +57,29 @@ def post_detail(request, year, month, day, post):
     # return HttpResponse('this is a test')
 # Create your views here.
 
+
+def post_share(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    cd = None
+    error = None
+    sent = False
+    if request.method == 'POST':
+        form = EmailPostForm(request.POST)
+        if form.is_valid():
+            # 如果验证没通过，则cleaned_data只包含通过
+            # 验证的数据
+            cd = form.cleaned_data
+            # send Mail
+            '''获取绝对路径的方式'''
+            post_url = request.build_absolute_uri(post.get_absolute_url())
+            subject = '{}({}) recommends you reading "{}"'.format(cd['name'], cd['email'], post.title)
+            message = 'Read "{}" at {}\n\n{}\'s comments:{}'.format(post.title, post_url, cd['name'], cd['comments'])
+            '''配合settings设定发送者的邮箱'''
+            send_mail(subject, message, '1354410847@qq.com', [cd['to']])
+            '''发送成功后sent为True'''
+            sent = True
+        else:
+            error = form.errors
+    else:
+        form = EmailPostForm()
+    return render(request, 'blog/post/share.html', {'post': post, 'form': form, 'cd': cd, 'sent': sent, 'error': error})
