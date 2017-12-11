@@ -4,9 +4,17 @@
             <a href="?page={{ page.previous_page_number }}">Previous</a>
         {% endif %}
     </span>
-    <span class="current">
-        Page {{ page.number }} of {{ page.paginator.num_pages }}
-    </span>
+{#    <span class="current">#}
+{#        Page {{ page.number }} of {{ page.paginator.num_pages }}#}
+{#    </span>#}
+    {% for c_page in page.paginator.page_range %}
+        {% if page.number == c_page %}
+            {{ c_page }}
+        {% else %}
+            <a href="?page={{ c_page }}">{{ c_page }}</a>
+        {% endif %}
+    {% endfor %}
+    
     {% if page.has_next %}
         <a href="?page={{ page.next_page_number }}">Next</a>
     {% endif %}
