@@ -51,4 +51,24 @@ class Post(models.Model):
                              self.publish.strftime('%d'),
                              self.slug, ])
 
+
+class Comment(models.Model):
+    # relate_name是给这个属性命名，这样就可以通过这个名反向定义到
+    # 这个对象。如，可以使用comment.post获取到帖子，
+    # 通过post.comments.all()来获取这篇帖子相关的评论。
+    # 如果不定义relate_name，那么系统默认会使用[模型名]_set来命名，
+    # 在本例中，就要使用post.comment_set.all()来读取帖子相关的评论
+    post = models.ForeignKey(Post, related_name='comments')
+    name = models.CharField(max_length=80)
+    email = models.EmailField()
+    body = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ('created', )
+
+    def __str__(self):
+        return "Comment by {} on {}".format(self.name, self.post)
 # Create your models here.
