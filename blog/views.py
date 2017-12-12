@@ -8,6 +8,7 @@ from django.views.generic import ListView
 from django.core.mail import send_mail
 from .models import Post, Comment
 from .forms import EmailPostForm, CommentForm
+from taggit.models import Tag
 
 
 class PostView(ListView):
@@ -16,7 +17,7 @@ class PostView(ListView):
     # 定义对象的名字
     context_object_name = 'posts'
     # 定义每页的个数
-    paginate_by = 1
+    paginate_by = 2
     # 定义模板
     template_name = 'blog/post/list.html'
 
@@ -25,10 +26,16 @@ def index(request):
     return HttpResponse('this is Index')
 
 
-def post_list(request):
+def post_list(request, tag_slug=None):
     object_lists = Post.objects.all()
+
+    # 添加标签过滤
+    tag = None
+    if tag_slug:
+        tag = get_object_or_404(Tag, slug=tag_slug)
+        object_lists = object_lists.filter(tags__in=[tag])
     # 定义分页，将posts分页，每页有三个
-    paginator = Paginator(object_lists, 3)
+    paginator = Paginator(object_lists, 2)
     # 获取当前页数
     page = request.GET.get('page')
     try:
@@ -41,7 +48,9 @@ def post_list(request):
     except EmptyPage:
         # 如果页数超过总页数则返回最后一页
         posts = paginator.page(paginator.num_pages)
-    # return render(request, 'blog/post/list.html', {'posts': posts, 'page':page})
+    return render(request, 'blog/post/list.html', {'posts': posts,
+                                                   'page': page,
+                                                   'tag': tag})
     # return HttpResponse('this is a test')
 
 
@@ -57,7 +66,6 @@ def post_detail(request, year, month, day, post):
     # 的relate_name值
     comments = post.comments.filter(active=True)
     new_comment = None
-    crsf = None
     if request.method == 'POST':
         comment_form = CommentForm(data=request.POST)
         if comment_form.is_valid():
