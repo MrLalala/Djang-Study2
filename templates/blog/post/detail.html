@@ -11,4 +11,33 @@
             Share this post
         </a>
     </p>
+{#    使用with可以有效避免多次查询数据库？知道endwith结束之前#}
+    {% with comments.count as total_comments %}
+    <h2>
+{#    pluralize的作用：在值不是1的后边添加s，如0 comments, 1 comment, N comments#}
+    {{ total_comments }} comment{{ total_comments|pluralize }}
+    </h2>
+    {% endwith %}
+    {% for comment in comments %}
+        <div class="comment">
+            <p class="info">
+{#                forloop.counter就是枚举计数#}
+                Comment {{ forloop.counter }} by {{ comment.name }}
+                {{ comment.created }}
+            </p>
+            {{ comment.body|linebreaks }}
+        </div>
+        {% empty %}
+            <p>There are no comments yet.</p>
+    {% endfor %}
+{#    当没有新建表单时#}
+    {% if new_comment %}
+        <h2>Your comments is added!</h2>
+    {% endif %}
+    <h2>Add New Comment</h2>
+    <form action="." method="post">
+        {{ comment_form.as_p }}
+        {% csrf_token %}
+        <p><input type="submit" value="Add Comment"></p>
+    </form>
 {% endblock %}

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
-from .models import Post
+from django.shortcuts import render, get_object_or_404, reverse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import ListView
-from .forms import EmailPostForm
 from django.core.mail import send_mail
+from .models import Post, Comment
+from .forms import EmailPostForm, CommentForm
 
 
 class PostView(ListView):
@@ -53,9 +53,39 @@ def post_detail(request, year, month, day, post):
                              publish__year=year,
                              publish__month=month,
                              publish__day=day)
-    return render(request, 'blog/post/detail.html', {'post': post})
+    # 这里的post.comments就是来自于Comment定义外键约束时
+    # 的relate_name值
+    comments = post.comments.filter(active=True)
+    new_comment = None
+    crsf = None
+    if request.method == 'POST':
+        comment_form = CommentForm(data=request.POST)
+        if comment_form.is_valid():
+            # 获取表单数据
+            new_comment = comment_form.save(commit=False)
+            # 指定表单的post为当前post
+            new_comment.post = post
+            # 将该表单保存
+            new_comment.save()
+            # 解决了刷新页面重复提交表单的方式之一：使用HttpResponseRedirect
+            # 明天研究使用crsf_token进行处理
+            comment_form = CommentForm()
+            return HttpResponseRedirect(reverse('blog:post_detail', args=[
+                post.publish.year,
+                post.publish.strftime('%m'),
+                post.publish.strftime('%d'),
+                post.slug
+            ]), {'post': post,
+                 'comments': comments,
+                 'new_comment': new_comment,
+                 'comment_form': comment_form})
+    else:
+        comment_form = CommentForm()
+    return render(request, 'blog/post/detail.html', {'post': post,
+                                                     'comments': comments,
+                                                     'new_comment': new_comment,
+                                                     'comment_form': comment_form})
     # return HttpResponse('this is a test')
-# Create your views here.
 
 
 def post_share(request, post_id):
@@ -83,3 +113,4 @@ def post_share(request, post_id):
     else:
         form = EmailPostForm()
     return render(request, 'blog/post/share.html', {'post': post, 'form': form, 'cd': cd, 'sent': sent, 'error': error})
+# Create your views here.
