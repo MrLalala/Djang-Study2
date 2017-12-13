@@ -54,7 +54,7 @@ def post_list(request, tag_slug=None):
     # return HttpResponse('this is a test')
 
 
-def post_detail(request, year, month, day, post):
+def post_detail(request, year, month, day, post, posted=False):
     # 返回一个Post类型的对象或者404 Not Found
     post = get_object_or_404(Post,
                              slug=post,
@@ -65,7 +65,6 @@ def post_detail(request, year, month, day, post):
     # 这里的post.comments就是来自于Comment定义外键约束时
     # 的relate_name值
     comments = post.comments.filter(active=True)
-    new_comment = None
     if request.method == 'POST':
         comment_form = CommentForm(data=request.POST)
         if comment_form.is_valid():
@@ -78,20 +77,19 @@ def post_detail(request, year, month, day, post):
             # 解决了刷新页面重复提交表单的方式之一：使用HttpResponseRedirect
             # 明天研究使用crsf_token进行处理
             comment_form = CommentForm()
-            return HttpResponseRedirect(reverse('blog:post_detail', args=[
+            posted = True
+            return HttpResponseRedirect(reverse('blog:post_detail_posted', args=[
                 post.publish.year,
                 post.publish.strftime('%m'),
                 post.publish.strftime('%d'),
-                post.slug
-            ]), {'post': post,
-                 'comments': comments,
-                 'new_comment': new_comment,
-                 'comment_form': comment_form})
+                post.slug,
+                True
+            ]))
     else:
         comment_form = CommentForm()
     return render(request, 'blog/post/detail.html', {'post': post,
                                                      'comments': comments,
-                                                     'new_comment': new_comment,
+                                                     'posted': posted,
                                                      'comment_form': comment_form})
     # return HttpResponse('this is a test')
 
