@@ -30,6 +30,15 @@
         {% empty %}
             <p>There are no comments yet.</p>
     {% endfor %}
+    <h2>Similar posts</h2>
+    {% for similar_post in similar_posts %}
+        <p>
+            <a href="{{ similar_post.get_absolute_url }}">{{ similar_post.title }}</a>
+        </p>
+        {% empty %}
+        There is no similar posts yet!
+    {% endfor %}
+
 {#    当没有新建表单时#}
     {% if posted %}
         <h2>Your comments is added!</h2>

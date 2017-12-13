@@ -6,9 +6,10 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import ListView
 from django.core.mail import send_mail
-from .models import Post, Comment
+from .models import Post
 from .forms import EmailPostForm, CommentForm
 from taggit.models import Tag
+from django.db.models import Count
 
 
 class PostView(ListView):
@@ -62,6 +63,20 @@ def post_detail(request, year, month, day, post, posted=False):
                              publish__year=year,
                              publish__month=month,
                              publish__day=day)
+    '''
+                    使用复杂结果集进行查询    
+    '''
+    # 获取一个查询结果集，该结果集保存的是该帖子的tags的id
+    post_tags_ids = post.tags.values_list('id', flat=True)
+    # 获取所有的帖子并过滤和该帖子拥有相同tags切不是本帖子的list
+    similar_posts = Post.objects.filter(tags__in=post_tags_ids).exclude(id=post.id)
+    # annotate中生成了一个名为same_tags的字段，该字段是统计每个similar_post
+    # 中的的tags的数量，然后再对其按照same_tags和publish（发布时间）
+    # 进行逆序排序
+    similar_posts = similar_posts.annotate(same_tags=Count('tags')).order_by('-same_tags','-publish')
+
+    similar_posts2 = post.tags.similar_objects()
+
     # 这里的post.comments就是来自于Comment定义外键约束时
     # 的relate_name值
     comments = post.comments.filter(active=True)
@@ -90,7 +105,8 @@ def post_detail(request, year, month, day, post, posted=False):
     return render(request, 'blog/post/detail.html', {'post': post,
                                                      'comments': comments,
                                                      'posted': posted,
-                                                     'comment_form': comment_form})
+                                                     'comment_form': comment_form,
+                                                     'similar_posts': similar_posts2})
     # return HttpResponse('this is a test')
 
 
