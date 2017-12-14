@@ -32,3 +32,13 @@ def show_latest_posts(count=5):
 def get_most_commented_posts(count=5):
     return Post.objects.annotate(count_num=Count('comments'))\
         .order_by('-count_num')[:count]
+
+
+@register.simple_tag
+def test():
+    return 'this is a test for filter, test test test'
+
+
+@register.simple_tag
+def phone():
+    return 17864215631

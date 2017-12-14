@@ -1,5 +1,5 @@
 {% extends 'blog/base.html' %}
-
+{% load blog_filter %}
 {% block title %}
 My Blog
 {% endblock %}
@@ -25,7 +25,9 @@ My Blog
         </p>
         <p class="date">Published {{ post.publish }} by {{ post.author }}</p>
 {#        truncatewords指定最多显示多少个字符,linebreaks指定将文本换行符转为html换行符#}
-        {{ post.body|truncatewords:30|linebreaks }}
+{#        {{ post.body|truncatewords:30|linebreaks }}#}
+{#        注意过滤器使用变量的方式#}
+        {{ post.body|markdown|truncatewords:30 }}
     {% endfor %}
     {% include 'blog/post/pagination.html' with page=posts %}
 {#    {% include 'blog/post/pagination.html' with page=page_obj %}#}

@@ -1,11 +1,15 @@
 {% extends 'blog/base.html' %}
+{#使用自定义标签和过滤器之前注意要载入#}
+{% load blog_filter %}
 {% block title %}
 {{ post.author }}
 {% endblock %}
 {% block content %}
 <h1>{{ post.title }}</h1>
     <p class="date">Published {{ post.publish }} by {{ post.author }}</p>
-    {{ post.body|linebreaks }}
+{#  使用自定义的过滤器，注意过滤器的名字#}
+{#    {{ post.body|linebreaks }}#}
+    {{ post.body|markdown }}
     <p>
         <a href="{% url 'blog:post_share' post.id %}">
             Share this post
